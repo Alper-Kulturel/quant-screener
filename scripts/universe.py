@@ -1,0 +1,4 @@
+UNIVERSE = ["AAPL","MSFT","GOOGL","AMZN","NVDA","META","TSLA","BRK-B","JPM","V",
+"UNH","XOM","JNJ","WMT","PG","MA","HD","CVX","ABBV","MRK","KO","PEP","COST","AVGO",
+"ADBE","CRM","NFLX","AMD","INTC","QCOM","TXN","ORCL","CSCO","PFE","LLY","TMO","ABT",
+"DHR","NKE","MCD","DIS","VZ","T","PM","MO","WFC","BAC","GS","MS","C"]
