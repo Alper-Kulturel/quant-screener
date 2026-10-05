@@ -53,6 +53,10 @@ def rank(df):
 
 def run():
     rows = [r for r in (analyze(t) for t in UNIVERSE) if r]
+    if not rows:
+        # An all-tickers-failed run used to reach rank() and die there with a
+        # bare KeyError on a column-less frame; bail out somewhere legible.
+        sys.exit("no tickers produced data — refusing to write an empty screen")
     df = pd.DataFrame(rows); ranked = rank(df)
     ranked["rank"] = range(1, len(ranked)+1)
     date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
