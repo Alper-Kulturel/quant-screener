@@ -20,9 +20,17 @@ def rsi(s, n=14):
     return 100 - 100/(1 + rs)
 
 def analyze(t):
+    # Fetch and compute are reported separately. A delisted ticker or a dropped
+    # connection is routine and just drops out of the screen, but a failure
+    # inside the indicator maths is a bug, and a bare `except Exception:
+    # return None` used to make the two indistinguishable.
     try:
         df = yf.Ticker(t).history(period="2y", interval="1d")
-        if df.empty or len(df) < 260: return None
+    except Exception as exc:
+        print(f"warn: {t}: fetch failed ({exc})", file=sys.stderr)
+        return None
+    if df.empty or len(df) < 260: return None
+    try:
         c = df["Close"]; rets = c.pct_change().dropna()
         return {"ticker":t,"price":round(float(c.iloc[-1]),2),
                 "momentum_12_1":round(float((c.iloc[-21]/c.iloc[-252]-1)*100),2),
@@ -30,7 +38,9 @@ def analyze(t):
                 "rsi_14":round(float(rsi(c).iloc[-1]),1),
                 "dist_ma50":round(float((c.iloc[-1]/c.rolling(50).mean().iloc[-1]-1)*100),2),
                 "sharpe_1y":round(float((rets.tail(252).mean()/rets.tail(252).std())*np.sqrt(252)),2)}
-    except Exception: return None
+    except Exception as exc:
+        print(f"warn: {t}: indicator computation failed ({exc})", file=sys.stderr)
+        return None
 
 def rank(df):
     d = df.copy()
