@@ -10,7 +10,14 @@ from universe import UNIVERSE
 def rsi(s, n=14):
     d = s.diff(); up = d.clip(lower=0).rolling(n).mean()
     dn = -d.clip(upper=0).rolling(n).mean()
-    return 100 - 100/(1 + up/dn)
+    # A window with no losing days has dn == 0. With gains that is a genuine
+    # RSI of 100, but a completely flat window leaves 0/0 -> NaN, and a NaN
+    # rsi_14 silently drops out of the RSI rank (rank() skips NaN) instead of
+    # scoring as neutral. Pin the flat case to 50 and the up-only case to 100.
+    rs = up / dn
+    rs = rs.mask((dn == 0) & (up == 0), 1.0)    # flat window -> RSI 50
+    rs = rs.mask((dn == 0) & (up > 0), np.inf)  # gains only  -> RSI 100
+    return 100 - 100/(1 + rs)
 
 def analyze(t):
     try:
